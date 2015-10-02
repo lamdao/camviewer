@@ -176,6 +176,7 @@ int main(int argc, char **argv)
 	int cfd = Camera::Open("/dev/video0", width, height, 30);
 	int vfb = FrameBuffer::Init("/dev/fb0");
 
+	setvbuf(stdout, 0, _IONBF, 0);
 	KalmanFilter::Init(FrameBuffer::bsize);
 	Timer::Start();
 	while (ready) {

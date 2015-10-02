@@ -37,6 +37,7 @@ public:
 	MainWindow(const char *dev): WinControl(ExposureMask|KeyPressMask),
 		ready(false), kalman(false), buffer(0)
 	{
+		setvbuf(stdout, 0, _IONBF, 0);
 		cfd = Camera::Open(dev, width = 640, height = 480, 30);
 		display = XOpenDisplay(NULL);
 		if (!display) {

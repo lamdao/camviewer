@@ -21,7 +21,7 @@ namespace Timer
 			u += 1000000;
 			s -= 1;
 		}   
-		printf("%4.1f ms\n", 1E-3 * (1000000 * s + u));
+		printf("%5.1f ms\r", 1E-3 * (1000000 * s + u));
 	}   
 
 	void Check()
