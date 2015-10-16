@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// A simple framebuffer application for camera monitoring using V4L2 library.
+// A simple camera broadcaster using V4L2 library and ZeroMQ.
 // Images captured from camera is stablized/denoised by Kalman Filter.
 //----------------------------------------------------------------------------
 #if __GNUC__ > 4
