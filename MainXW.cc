@@ -95,6 +95,7 @@ public:
 		int xfd = ConnectionNumber(display);
 
 		Timer::Start();
+		XSync(display, 0);
 		while (ready) {
 			timeval tv = {0, 20000};
 			fd_set rfds;
