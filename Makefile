@@ -9,7 +9,7 @@ CFLAGS+=-DUSE_CPU
 endif
 CORE=camera.o kalman.o sse_utils.o
 
-all: cvXw cvFb
+all: cvXw cvFb cvBs cvBc
 
 %.o: %.cc
 	gcc $(CFLAGS) -c $<
@@ -19,6 +19,12 @@ cvXw: MainXW.cc Window.cc Window.h timer.h $(CORE)
 
 cvFb: MainFB.cc timer.h $(CORE)
 	gcc $(CFLAGS) -o $@ MainFB.cc $(CORE) $(LIBS)
+
+cvBs: MainBS.cc timer.h $(CORE)
+	gcc -std=c++11 $(CFLAGS) -o $@ MainBS.cc $(CORE) $(LIBS) -lzmq
+
+cvBc: MainBC.cc Window.cc Window.h timer.h $(CORE)
+	gcc -std=c++11 $(CFLAGS) -o $@ MainBC.cc Window.cc $(CORE) $(LIBS) -lX11 -lzmq
 
 clean:
 	rm -f *.o
