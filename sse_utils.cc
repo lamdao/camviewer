@@ -1,6 +1,15 @@
 //----------------------------------------------------------------------------
 // SSE implementation of some utility functions used in motion detection
 //----------------------------------------------------------------------------
+// Author: Lam H. Dao <daohailam(at)yahoo(dot)com>
+//----------------------------------------------------------------------------
+//
+//  This program is free software; you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation; either version 3 of the License, or
+//  (at your option) any later version.
+//
+//----------------------------------------------------------------------------
 #include <emmintrin.h>
 #ifdef __SSSE3__
 #include <tmmintrin.h>
