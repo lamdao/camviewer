@@ -21,7 +21,7 @@ cvFb: MainFB.cc timer.h $(CORE)
 	gcc $(CFLAGS) -o $@ MainFB.cc $(CORE) $(LIBS)
 
 cvBs: MainBS.cc timer.h $(CORE)
-	gcc -std=c++11 $(CFLAGS) -o $@ MainBS.cc $(CORE) $(LIBS) -lzmq
+	gcc -std=c++11 $(CFLAGS) -o $@ MainBS.cc $(CORE) $(LIBS) -lzmq -llz4
 
 cvBc: MainBC.cc Window.cc Window.h timer.h $(CORE)
 	gcc -std=c++11 $(CFLAGS) -o $@ MainBC.cc Window.cc $(CORE) $(LIBS) -lX11 -lzmq
@@ -30,5 +30,5 @@ clean:
 	rm -f *.o
 
 distclean: clean
-	rm -f cvXw cvFb
+	rm -f cvXw cvFb cvBs cvBc
 
