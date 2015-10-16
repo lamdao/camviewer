@@ -1,0 +1,2 @@
+- Add fast compression to reduce traffic from server to client (LZ4)
+- Add frame differences calculation (background subtraction)
