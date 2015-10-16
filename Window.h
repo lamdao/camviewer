@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------
-// WinControl.h - Interface of simple X-Window control
+// Window.h - Interface of simple X-Window control
 //--------------------------------------------------------------------------
 // Author: Lam H. Dao <daohailam(at)yahoo(dot)com>
 //--------------------------------------------------------------------------

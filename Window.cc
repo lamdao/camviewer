@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------
-// WinControl.cpp - Implementation of simple X-Window control
+// Window.cpp - Implementation of simple X-Window control
 //--------------------------------------------------------------------------
 // Author: Lam H. Dao <daohailam(at)yahoo(dot)com>
 //--------------------------------------------------------------------------
