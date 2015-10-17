@@ -22,6 +22,7 @@
 #include "timer.h"
 #include "camera.h"
 #include "kalman.h"
+#include "buffer.h"
 #include "Window.h"
 //----------------------------------------------------------------------------
 int screen = 0;
@@ -37,14 +38,14 @@ class MainWindow: public WinControl
 	int cfd;
 	int size;
 	int bsize;
-	uchar *buffer;
+	buffer_ptr<uchar> buffer;
 	XImage *image;
 	GC context;
 
 	bool ready, kalman;
 public:
 	MainWindow(const char *dev): WinControl(ExposureMask|KeyPressMask),
-		ready(false), kalman(true), buffer(0)
+		ready(false), kalman(true), buffer(nullptr)
 	{
 		setvbuf(stdout, 0, _IONBF, 0);
 		cfd = Camera::Open(dev, width = 640, height = 480, 30);
@@ -78,7 +79,6 @@ public:
 		KalmanFilter::Release();
 		Camera::Close();
 
-		free(buffer);
 		if (image) {
 			XDestroyImage(image);
 		}
@@ -130,9 +130,10 @@ public:
 	{
 		if (!frame) return;
 		register uchar *src = (uchar *)frame;
-		register uchar *dst = buffer;
+		register uchar *dst = buffer.get();
 		if (!dst) {
-			dst = buffer = (uchar *)valloc(bsize);
+			buffer = CreateBuffer(bsize);
+			dst = buffer.get();
 			memcpy(dst, src, bsize);
 		} else if (kalman) {
 			KalmanFilter::Execute(src, dst);
