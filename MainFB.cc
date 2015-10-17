@@ -29,6 +29,7 @@
 #include <fcntl.h>
 //----------------------------------------------------------------------------
 #include "camera.h"
+#include "buffer.h"
 #include "kalman.h"
 #include "timer.h"
 //----------------------------------------------------------------------------
@@ -41,6 +42,7 @@ int vfb = -1;
 int size, bsize, bpp, vgap, vofs;
 int fbsize;
 //----------------------------------------------------------------------------
+buffer_ptr<uchar> buffer(nullptr);
 uchar *image = 0, *fbimage;
 //----------------------------------------------------------------------------
 void display_rgb15()
@@ -156,7 +158,8 @@ int Init(const char *dev)
 void Update(const void *frame)
 {
 	if (!image) {
-		image = (uchar *)valloc(bsize);
+		buffer = CreateBuffer(bsize);
+		image = buffer.get();
 		memcpy(image, frame, bsize);
 	} else {
 		register uchar *src = (uchar *)frame;
@@ -174,7 +177,6 @@ void Release()
 {
 	munmap(fbimage, fbsize);
 	close(vfb);
-	free(image);
 }
 //----------------------------------------------------------------------------
 } // namespace FrameBuffer
