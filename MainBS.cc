@@ -34,35 +34,35 @@
 //----------------------------------------------------------------------------
 #include "camera.h"
 #include "kalman.h"
+#include "buffer.h"
 #include "timer.h"
+#include "djpeg.h"
 //----------------------------------------------------------------------------
 using namespace std;
 //----------------------------------------------------------------------------
 bool ready = true, kalman = true;
 int width = 640, height = 480;
-int bsize = width * height * 3;
-uchar *image;
+int psize = width * height, bsize = 3 * psize;
+buffer_ptr<uchar> jpeg = CreateBuffer(bsize);
+buffer_ptr<uchar> image;
 //----------------------------------------------------------------------------
 void Send(shared_ptr<zmq::socket_t> bcast, const void *frame)
 {
 	if (!image) {
-		image = (uchar *)valloc(bsize);
-		memcpy(image, frame, bsize);
+		image = CreateBuffer(bsize);
+		memcpy(image.get(), frame, bsize);
 	} else {
 		uchar *src = (uchar *)frame;
-		uchar *dst = (uchar *)image;
+		uchar *dst = (uchar *)image.get();
 		if (kalman) {
 			KalmanFilter::Execute(src, dst);
 		} else {
 			memcpy(dst, src, bsize);
 		}
 	}
-	static const char *sig = "FRAME";
-	static int siglen = strlen(sig);
-	zmq::message_t msg(bsize+siglen);
-	uchar *b = (uchar *)msg.data();
-	memcpy(b, sig, siglen);
-	memcpy(&b[siglen], image, bsize);
+	size_t csize = DJpeg::Compress(image.get(), jpeg.get(), width, height);
+	zmq::message_t msg(csize);
+	memcpy(msg.data(), jpeg.get(), csize);
 	bcast->send(msg);
 }
 //----------------------------------------------------------------------------
@@ -85,6 +85,7 @@ int main(int argc, char **argv)
 	KalmanFilter::Init(bsize);
 	Timer::Start();
 	while (ready) {
+		try {
 		zmq::poll(&items[0], 2, 1);
 		if (items[0].revents & ZMQ_POLLIN) {
 			int k = getchar();
@@ -99,6 +100,8 @@ int main(int argc, char **argv)
 			Send(bcast, frame);
 			if (show_time)
 				Timer::Check();
+		}
+		} catch (zmq::error_t &e) {
 		}
 	}
 	KalmanFilter::Release();

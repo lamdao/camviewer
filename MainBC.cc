@@ -21,8 +21,11 @@
 #include <cstring>
 #include <memory>
 #include <zmq.hpp>
+//----------------------------------------------------------------------------
 #include "timer.h"
+#include "djpeg.h"
 #include "kalman.h"
+#include "buffer.h"
 #include "Window.h"
 //----------------------------------------------------------------------------
 int screen = 0;
@@ -33,14 +36,6 @@ Colormap ScreenColormap;
 //----------------------------------------------------------------------------
 Window Root;
 //----------------------------------------------------------------------------
-template<typename T>
-using buffer_ptr = std::unique_ptr<T,std::function<void(T*)>>;
-//----------------------------------------------------------------------------
-buffer_ptr<uchar> CreateBuffer(int bsize)
-{
-	return buffer_ptr<uchar>((uchar*)valloc(bsize), [](uchar *b) {free(b);});
-}
-//----------------------------------------------------------------------------
 class MainWindow: public WinControl
 {
 	int size;
@@ -48,13 +43,15 @@ class MainWindow: public WinControl
 	XImage *image;
 	GC context;
 	buffer_ptr<uchar> buffer;
+	buffer_ptr<uchar> frame;
 	zmq::context_t ctx;
 	zmq::socket_t socket;
 
 	bool ready, kalman;
 public:
 	MainWindow(const char *ip): WinControl(ExposureMask|KeyPressMask),
-		ready(false), kalman(true), buffer(nullptr), ctx(1), socket(ctx, ZMQ_SUB)
+		ready(false), kalman(true), buffer(nullptr), frame(nullptr),
+		ctx(1), socket(ctx, ZMQ_SUB)
 	{
 		setvbuf(stdout, 0, _IONBF, 0);
 		display = XOpenDisplay(NULL);
@@ -83,7 +80,11 @@ public:
 		std::cout << "Connecting to " << ip << ":1975 server…" << std::endl;
 		std::string server = std::string("tcp://")+ip+":1975";
 		socket.connect(server.c_str());
-		socket.setsockopt(ZMQ_SUBSCRIBE, "FRAME", 5);
+
+		// Jpeg File signature
+		uchar jsig[] = {0xFF,0xD8,0xFF,0xE0,0x00,0x10,0x4A,0x46,0x49,0x46};
+		socket.setsockopt(ZMQ_SUBSCRIBE, jsig, sizeof(jsig));
+		frame = CreateBuffer(bsize);
 		ready = true;
 	}
 
@@ -139,12 +140,17 @@ public:
 		}
 	}
 
+	zmq::message_t jpeg;
+	uchar *GetFrame()
+	{
+		int w, h;
+		socket.recv(&jpeg);
+		return DJpeg::Decompress(jpeg.data(), jpeg.size(), frame.get(), w, h);
+	}
+
 	void Update()
 	{
-		zmq::message_t frame;
-		socket.recv(&frame);
-
-		uchar *src = (uchar *)frame.data(); src += 5;
+		uchar *src = GetFrame();
 		uchar *dst = buffer.get();
 		if (!dst) {
 			buffer = CreateBuffer(bsize);
