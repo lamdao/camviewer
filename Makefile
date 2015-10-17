@@ -14,19 +14,19 @@ JPEG=$(DOBJ) -lturbojpeg
 all: cvXw cvFb cvBs cvBc
 
 %.o: %.cc
-	gcc $(CFLAGS) -c $<
+	$(CXX) $(CFLAGS) -c $<
 
 cvXw: MainXW.cc Window.cc Window.h timer.h $(CORE)
-	gcc $(CFLAGS) -o $@ MainXW.cc Window.cc $(CORE) -lX11 $(LIBS)
+	$(CXX) $(CFLAGS) -o $@ MainXW.cc Window.cc $(CORE) -lX11 $(LIBS)
 
 cvFb: MainFB.cc timer.h $(CORE)
-	gcc $(CFLAGS) -o $@ MainFB.cc $(CORE) $(LIBS)
+	$(CXX) $(CFLAGS) -o $@ MainFB.cc $(CORE) $(LIBS)
 
 cvBs: MainBS.cc timer.h $(CORE) $(DOBJ)
-	gcc $(CFLAGS) -o $@ MainBS.cc $(CORE) $(JPEG) $(LIBS) -lzmq
+	$(CXX) $(CFLAGS) -o $@ MainBS.cc $(CORE) $(JPEG) $(LIBS) -lzmq
 
 cvBc: MainBC.cc Window.cc Window.h timer.h $(CORE) $(DOBJ)
-	gcc $(CFLAGS) -o $@ MainBC.cc Window.cc $(CORE) $(JPEG) $(LIBS) -lX11 -lzmq
+	$(CXX) $(CFLAGS) -o $@ MainBC.cc Window.cc $(CORE) $(JPEG) $(LIBS) -lX11 -lzmq
 
 clean:
 	rm -f *.o
